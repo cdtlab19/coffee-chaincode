@@ -52,7 +52,7 @@ func (c *CoffeeChaincode) Repository(stub shim.ChaincodeStubInterface) *CoffeeRe
 // CreateCoffee cria um novo café
 func (c *CoffeeChaincode) CreateCoffee(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
 	if len(args) != 1 {
-		return nil, fmt.Errorf("Precisa de '%s' argumentos, recebido '%d'", 1, len(args))
+		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
 	}
 
 	coffee := &Coffee{}
@@ -75,7 +75,7 @@ func (c *CoffeeChaincode) UpdateCoffee(stub shim.ChaincodeStubInterface, args []
 // GetCoffee retorna um café
 func (c *CoffeeChaincode) GetCoffee(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
 	if len(args) != 1 {
-		return nil, fmt.Errorf("Precisa de '%s' argumentos, recebido '%d'", 1, len(args))
+		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
 	}
 
 	coffee, err := c.Repository(stub).GetCoffee(args[0])
@@ -107,7 +107,7 @@ func (c *CoffeeChaincode) AllCoffee(stub shim.ChaincodeStubInterface, args []str
 // DeleteCoffee retorna todos os cafés
 func (c *CoffeeChaincode) DeleteCoffee(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
 	if len(args) != 1 {
-		return nil, fmt.Errorf("Precisa de '%s' argumentos, recebido '%d'", 1, len(args))
+		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
 	}
 
 	return nil, c.Repository(stub).DeleteCoffee(args[0])
