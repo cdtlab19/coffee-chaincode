@@ -21,15 +21,15 @@ var _ shim.Chaincode = &CoffeeChaincode{}
 // NewCoffeeChaincode cria uma nova instância do CoffeeChaincode para gerenciamento de
 // cafés com os parâmetros default
 func NewCoffeeChaincode(logger base.Logger) *CoffeeChaincode {
-	CoffeeChaincode := &CoffeeChaincode{logger: logger}
-	CoffeeChaincode.router = base.NewRouter().
-		Add("CreateCoffee", CoffeeChaincode.CreateCoffee).
-		Add("UpdateCoffee", CoffeeChaincode.UpdateCoffee).
-		Add("GetCoffee", CoffeeChaincode.GetCoffee).
-		Add("AllCoffee", CoffeeChaincode.AllCoffee).
-		Add("DeleteCoffee", CoffeeChaincode.DeleteCoffee)
+	chaincode := &CoffeeChaincode{logger: logger}
+	chaincode.router = base.NewRouter().
+		Add("CreateCoffee", chaincode.CreateCoffee).
+		Add("UpdateCoffee", chaincode.UpdateCoffee).
+		Add("GetCoffee", chaincode.GetCoffee).
+		Add("AllCoffee", chaincode.AllCoffee).
+		Add("DeleteCoffee", chaincode.DeleteCoffee)
 
-	return CoffeeChaincode
+	return chaincode
 }
 
 // Init realiza as operações de inicialização do CoffeeChaincode
