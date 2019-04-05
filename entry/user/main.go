@@ -1,6 +1,9 @@
 package main
 
-import "github.com/hyperledger/fabric/core/chaincode/shim"
+import (
+	"github.com/cdtlab19/coffee-chaincode/chaincode"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+)
 
 func main() {
 	logger := shim.NewLogger("user")
