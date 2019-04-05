@@ -9,3 +9,8 @@ Coffee Pod Manager is a simple Blockchain application for learning purposes. It 
 The Chaincode `coffee' controlls usage of coffe pods
 
     github.com/cdtlab19/coffee-chaincode/entry/coffee
+
+### Testing
+
+    $ go get ./...
+    $ go test ./...

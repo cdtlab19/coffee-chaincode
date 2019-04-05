@@ -1,7 +1,6 @@
 package chaincode
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -56,10 +55,7 @@ func (c *CoffeeChaincode) CreateCoffee(stub shim.ChaincodeStubInterface, args []
 		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
 	}
 
-	coffee := &model.Coffee{}
-	if err := json.Unmarshal([]byte(args[0]), &coffee); err != nil {
-		return nil, err
-	}
+	coffee := model.NewCoffee(stub.GetTxID(), args[0])
 
 	if err := c.store(stub).SetCoffee(coffee); err != nil {
 		return nil, err

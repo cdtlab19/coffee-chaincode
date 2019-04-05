@@ -60,7 +60,7 @@ func (c *Coffee) Valid() error {
 	if c.DocType != CoffeeDocType {
 		return fmt.Errorf("coffee docType not set to '%s'", CoffeeDocType)
 	}
-	if c.ID != "" {
+	if c.ID == "" {
 		return fmt.Errorf("missing coffee ID")
 	}
 	return nil

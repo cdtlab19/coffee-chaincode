@@ -40,14 +40,13 @@ func (r *Router) Handle(stub shim.ChaincodeStubInterface, name string, args []st
 		return shim.Error(fmt.Sprintf("Error executing chaincode: %s", err.Error()))
 	}
 
-	if response != nil {
-		v, err := json.Marshal(response)
-		if err != nil {
-			return shim.Error(fmt.Sprintf("Error encoding response: %s", err.Error()))
-		}
-
-		return shim.Success(v)
-	} else {
+	if response == nil {
 		return shim.Success(nil)
 	}
+
+	v, err := json.Marshal(response)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("Error encoding response: %s", err.Error()))
+	}
+	return shim.Success(v)
 }
