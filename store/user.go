@@ -18,16 +18,16 @@ func NewUserStore(stub shim.ChaincodeStubInterface, logger *shim.ChaincodeLogger
 	return &UserStore{stub, logger}
 }
 
-// AllUsers returns all existing users
-func (u *UserStore) AllUsers() ([]*model.User, error) {
-	u.logger.Debug("Entered AllUsers")
+// AllUser returns all existing users
+func (u *UserStore) AllUser() ([]*model.User, error) {
+	u.logger.Debug("Entered AllUser")
 	iterator, err := u.stub.GetStateByPartialCompositeKey(model.UserDocType, []string{model.UserDocType})
 	if err != nil {
 		return nil, err
 	}
 	defer iterator.Close()
 
-	u.logger.Debug("AllUsers: starting iterator")
+	u.logger.Debug("AllUser: starting iterator")
 	users := make([]*model.User, 1)
 	for iterator.HasNext() {
 		k, err := iterator.Next()
@@ -47,4 +47,29 @@ func (u *UserStore) AllUsers() ([]*model.User, error) {
 	u.logger.Debug("Exiting AllUsers")
 	return users, nil
 
+}
+
+// GetUser returns an user by it's ID
+func (u *UserStore) GetUser(userID string) (user *model.User, err error) {
+	u.logger.Debug("GetUser: searching for user '%s'", userID)
+
+	data, err := u.stub.GetState(model.UserKey(userID))
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(data, &user)
+	return
+}
+
+// SetUser sets an user asset by it's ID
+func (u *UserStore) SetUser(user *model.User) error {
+	u.logger.Debug("SetUser: setting user %s", user.ID)
+	return u.stub.PutState(user.Key(), user.JSON())
+}
+
+// DeleteUser deletes an user asset by it's ID
+func (u *UserStore) DeleteUser(userID string) error {
+	u.logger.Debug("DeleteUser: deleting user %s", userID)
+	return u.stub.DelState(model.UserKey(userID))
 }

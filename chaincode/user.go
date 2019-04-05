@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cdtlab19/coffee-chaincode/model"
+	"github.com/cdtlab19/coffee-chaincode/store"
 	"github.com/cdtlab19/coffee-chaincode/utils"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -22,7 +23,14 @@ var _ shim.Chaincode = &UserChaincode{}
 // usuários com os parâmetros default
 func NewUserChaincode(logger *shim.ChaincodeLogger) *UserChaincode {
 	chaincode := &UserChaincode{logger: logger}
-	// TODO: ADD ROUTES
+	chaincode.router = utils.NewRouter().
+		Add("CreateUser", chaincode.CreateUser).
+		Add("GetUser", chaincode.GetUser).
+		Add("AllUser", chaincode.AllUser).
+		Add("DeleteUser", chaincode.DeleteUser)
+
+	return chaincode
+
 }
 
 // Init realiza as operações de inicialização do UserChaincode
@@ -36,6 +44,11 @@ func (u *UserChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	return u.router.Handle(stub, fn, args)
 }
 
+func (u *UserChaincode) store(stub shim.ChaincodeStubInterface) *store.UserStore {
+	return store.NewUserStore(stub, u.logger)
+}
+
+// CreateUser cria um novo usuário
 func (u *UserChaincode) CreateUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
 	if len(args) != 1 {
 		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
@@ -47,4 +60,38 @@ func (u *UserChaincode) CreateUser(stub shim.ChaincodeStubInterface, args []stri
 	}
 
 	return nil, nil
+}
+
+// GetUser retorna um usuário
+func (u *UserChaincode) GetUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
+	}
+
+	user, err := u.store(stub).GetUser(args[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return struct {
+		User *model.User `json:"user"`
+	}{user}, nil
+}
+
+// AllUser retorna todos os usuários
+func (u *UserChaincode) AllUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
+	if len(args) != 0 {
+		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
+	}
+
+	return nil, u.store(stub).DeleteUser(args[0])
+}
+
+// DeleteUser deleta um usuário
+func (u *UserChaincode) DeleteUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
+	}
+
+	return nil, u.store(stub).DeleteUser(args[0])
 }
