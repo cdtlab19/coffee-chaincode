@@ -1,0 +1,50 @@
+package chaincode
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/cdtlab19/coffee-chaincode/model"
+	"github.com/cdtlab19/coffee-chaincode/utils"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+	pb "github.com/hyperledger/fabric/protos/peer"
+)
+
+// UserChaincode is a chaincode controller for user assets
+type UserChaincode struct {
+	logger *shim.ChaincodeLogger
+	router *utils.Router
+}
+
+var _ shim.Chaincode = &UserChaincode{}
+
+// NewUserChaincode cria uma nova instância do UserChaincode para gerenciamento de
+// usuários com os parâmetros default
+func NewUserChaincode(logger *shim.ChaincodeLogger) *UserChaincode {
+	chaincode := &UserChaincode{logger: logger}
+	// TODO: ADD ROUTES
+}
+
+// Init realiza as operações de inicialização do UserChaincode
+func (u *UserChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+	return shim.Success(nil)
+}
+
+// Invoke é chamado toda vez que o Chaicode é invocado
+func (u *UserChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+	fn, args := stub.GetFunctionAndParameters()
+	return u.router.Handle(stub, fn, args)
+}
+
+func (u *UserChaincode) CreateUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
+	}
+
+	user := &model.User{}
+	if err := json.Unmarshal([]byte(args[0]), &user); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
