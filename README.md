@@ -1,6 +1,6 @@
 # Hyperledger Fabric Coffee Pod Manager
 
-![image](https://travis-ci.com/vtfr/coffee-chain.svg?branch=master)
+[![Build Status](https://travis-ci.com/cdtlab19/coffee-chaincode.svg?branch=master)](https://travis-ci.com/cdtlab19/coffee-chaincode)
 
 Coffee Pod Manager is a simple Blockchain application for learning purposes. It manages coffee pods by using Hyperledger Fabric's Distributed Ledger.
 
