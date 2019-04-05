@@ -1,6 +1,8 @@
 package chaincode_test
 
 import (
+	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -41,6 +43,55 @@ var _ = Describe("Coffee", func() {
 		Expect(coffee.Flavour).To(Equal("cappuccino"))
 	})
 
+	Context("GetCoffee Method", func() {
+		const method = "GetCoffee"
+
+		It("Should return invalid if called with more than one argument", func() {
+			// invoke method with 0 arguments
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte(method),
+			})
+			Expect(int(result.Status)).To(Equal(shim.ERROR))
+
+			// invoke method with 2 arguments
+			result = mock.MockInvoke("0001", [][]byte{
+				[]byte(method),
+				[]byte("a"),
+				[]byte("b"),
+			})
+			Expect(int(result.Status)).To(Equal(shim.ERROR))
+		})
+
+		It("Should return error if no coffee found", func() {
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte(method),
+				[]byte("0000"),
+			})
+			Expect(int(result.Status)).To(Equal(shim.ERROR))
+			Expect(result.Payload).To(BeEmpty())
+		})
+
+		It("Should return a valid coffee if it exists", func() {
+			createTestCoffee(mock, st, model.NewCoffee("0000", "cappuccino"))
+
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte(method),
+				[]byte("0000"),
+			})
+			Expect(int(result.Status)).To(Equal(shim.OK))
+			Expect(result.Payload).NotTo(BeEmpty())
+
+			// Payload: { "coffee": {...} }
+			var response struct {
+				Coffee *model.Coffee `json:"coffee"`
+			}
+
+			Expect(json.Unmarshal(result.Payload, &response)).NotTo(HaveOccurred())
+			Expect(response.Coffee.ID).To(Equal("0000"))
+			Expect(response.Coffee.Flavour).To(Equal("cappuccino"))
+		})
+	})
+
 	Context("Method UseCoffee", func() {
 		const method = "UseCoffee"
 
@@ -60,9 +111,25 @@ var _ = Describe("Coffee", func() {
 			Expect(int(result.Status)).To(Equal(shim.ERROR))
 		})
 
+		It("Should not set the owner to an already owned chaincode", func() {
+			coffee := model.NewCoffee("0000", "cappuccino")
+			coffee.SetOwner("owner")
+			createTestCoffee(mock, st, coffee)
+
+			// invoke UseCoffee
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte("UseCoffee"),
+				[]byte("0000"),
+				[]byte("test-owner"),
+			})
+
+			Expect(int(result.Status)).To(Equal(shim.ERROR))
+			Expect(result.Payload).To(BeEmpty())
+		})
+
 		It("Should execute successfuly", func() {
 			// create asset for testing
-			createTestCoffee(mock, st, model.NewCoffee("0000", "capuccino"))
+			createTestCoffee(mock, st, model.NewCoffee("0000", "cappuccino"))
 
 			// invoke UseCoffee
 			result := mock.MockInvoke("0000", [][]byte{
@@ -102,7 +169,7 @@ var _ = Describe("Coffee", func() {
 		})
 
 		It("Should execute successfuly", func() {
-			createTestCoffee(mock, st, model.NewCoffee("0000", "capuccino"))
+			createTestCoffee(mock, st, model.NewCoffee("0000", "cappuccino"))
 
 			// invoke UseCoffee
 			result := mock.MockInvoke("0000", [][]byte{
@@ -122,7 +189,7 @@ var _ = Describe("Coffee", func() {
 
 	It("Should DeleteCoffee", func() {
 		// create asset for testing
-		createTestCoffee(mock, st, model.NewCoffee("0000", "capuccino"))
+		createTestCoffee(mock, st, model.NewCoffee("0000", "cappuccino"))
 
 		// invoke UseCoffee
 		result := mock.MockInvoke("0000", [][]byte{
