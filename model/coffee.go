@@ -40,12 +40,12 @@ func (c *Coffee) Key() string {
 	return CoffeeKey(c.ID)
 }
 
-// HasOwner verifies if a Coffe has a owner
+// HasOwner verifies if a Coffee has a owner
 func (c *Coffee) HasOwner() bool {
 	return c.Owner != ""
 }
 
-// SetOwner sets a coffe owner if it's not set
+// SetOwner sets a Coffe owner if it's not set
 func (c *Coffee) SetOwner(owner string) error {
 	if c.HasOwner() {
 		return errors.New("coffee already has a owner")
