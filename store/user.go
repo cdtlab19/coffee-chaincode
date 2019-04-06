@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cdtlab19/coffee-chaincode/model"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -65,7 +66,10 @@ func (u *UserStore) GetUser(userID string) (user *model.User, err error) {
 // SetUser sets an user asset by it's ID
 func (u *UserStore) SetUser(user *model.User) error {
 	u.logger.Debug("SetUser: setting user %s", user.ID)
-	return u.stub.PutState(user.Key(), user.JSON())
+	if user.ID != "" {
+		return u.stub.PutState(user.Key(), user.JSON())
+	}
+	return fmt.Errorf("ID cannot be empty")
 }
 
 // DeleteUser deletes an user asset by it's ID

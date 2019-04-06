@@ -1,7 +1,6 @@
 package chaincode
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cdtlab19/coffee-chaincode/model"
@@ -54,8 +53,9 @@ func (u *UserChaincode) CreateUser(stub shim.ChaincodeStubInterface, args []stri
 		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
 	}
 
-	user := &model.User{}
-	if err := json.Unmarshal([]byte(args[0]), &user); err != nil {
+	user := model.NewUser(stub.GetTxID(), args[0])
+
+	if err := u.store(stub).SetUser(user); err != nil {
 		return nil, err
 	}
 
@@ -84,7 +84,15 @@ func (u *UserChaincode) AllUser(stub shim.ChaincodeStubInterface, args []string)
 		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
 	}
 
-	return nil, u.store(stub).DeleteUser(args[0])
+	users, err := u.store(stub).AllUser()
+	if err != nil {
+		return nil, err
+	}
+
+	return struct {
+		Users []*model.User `json:"users"`
+	}{users}, nil
+
 }
 
 // DeleteUser deleta um usuário

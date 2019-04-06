@@ -41,12 +41,19 @@ var _ = Describe("Coffee", func() {
 		coffee, err := st.GetCoffee("0000")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(coffee.Flavour).To(Equal("cappuccino"))
+
+		result = mock.MockInvoke("0001", [][]byte{
+			[]byte("CreateCoffee"),
+			[]byte("cappuccino"),
+			[]byte("somethineElse"),
+		})
+
 	})
 
 	Context("GetCoffee Method", func() {
 		const method = "GetCoffee"
 
-		It("Should return invalid if called with more than one argument", func() {
+		It("Should return invalid if called with something other than one argument", func() {
 			// invoke method with 0 arguments
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),

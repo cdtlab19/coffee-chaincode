@@ -26,7 +26,7 @@ type User struct {
 // NewUser creates an user
 func NewUser(id string, name string) *User {
 	return &User{
-		DocType: "TODO",
+		DocType: UserDocType,
 		ID:      id,
 		Name:    name,
 	}
@@ -45,6 +45,11 @@ func (u *User) Valid() error {
 	if u.ID == "" {
 		return fmt.Errorf("missing user ID")
 	}
+
+	if u.Name == "" {
+		return fmt.Errorf("missing user name")
+	}
+
 	return nil
 }
 
