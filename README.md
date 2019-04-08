@@ -1,6 +1,7 @@
 # Hyperledger Fabric Coffee Pod Manager
 
 [![Build Status](https://travis-ci.com/cdtlab19/coffee-chaincode.svg?branch=master)](https://travis-ci.com/cdtlab19/coffee-chaincode)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cdtlab19/coffee-chaincode)](https://goreportcard.com/report/github.com/cdtlab19/coffee-chaincode)
 [![codecov](https://codecov.io/gh/cdtlab19/coffee-chaincode/branch/master/graph/badge.svg)](https://codecov.io/gh/cdtlab19/coffee-chaincode)
 [![GoDoc](https://godoc.org/github.com/cdtlab19/coffee-chaincode?status.svg)](https://godoc.org/github.com/cdtlab19/coffee-chaincode)
 
