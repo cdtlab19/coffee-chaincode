@@ -4,8 +4,7 @@
 [![codecov](https://codecov.io/gh/cdtlab19/coffee-chaincode/branch/master/graph/badge.svg)](https://codecov.io/gh/cdtlab19/coffee-chaincode)
 [![GoDoc](https://godoc.org/github.com/cdtlab19/coffee-chaincode?status.svg)](https://godoc.org/github.com/cdtlab19/coffee-chaincode)
 
-Coffee Pod Manager is a simple Blockchain application for learning purposes. It manages coffee pods by using Hyperledger Fabric's Dis
-tributed Ledger.
+Coffee Pod Manager is a simple Blockchain application for learning purposes. It manages coffee pods by using Hyperledger Fabric's Distributed Ledger.
 
 ## Chaincodes
 
@@ -17,5 +16,5 @@ The Chaincode `coffee' controlls usage of coffe pods
 
 ### Testing
 
-    $ go get ./...
+    $ go get -u -t ./...
     $ go test ./...
