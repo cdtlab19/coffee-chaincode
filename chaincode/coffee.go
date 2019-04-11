@@ -65,7 +65,13 @@ func (cc *CoffeeChaincode) CreateCoffee(c rocha.Context) (interface{}, error) {
 
 	coffee := model.NewCoffee(stub.GetTxID(), c.String("flavour"))
 
-	return nil, cc.store(stub).SetCoffee(coffee)
+	if err := cc.store(stub).SetCoffee(coffee); err != nil {
+		return nil, err
+	}
+
+	return struct {
+		Coffee *model.Coffee `json:"coffee"`
+	}{coffee}, nil
 }
 
 // UseCoffee uses a coffee capsule

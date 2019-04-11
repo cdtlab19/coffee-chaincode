@@ -35,8 +35,17 @@ var _ = Describe("Coffee", func() {
 			[]byte("cappuccino"),
 		})
 
+		// verify status
 		Expect(int(result.Status)).To(Equal(shim.OK))
-		Expect(result.Payload).To(BeEmpty())
+
+		// verify payload
+		var response struct {
+			Coffee *model.Coffee `json:"coffee"`
+		}
+
+		Expect(json.Unmarshal(result.Payload, &response)).ToNot(HaveOccurred())
+		Expect(response.Coffee.Flavour).To(Equal("cappuccino"))
+		Expect(response.Coffee.ID).To(Equal("0000"))
 
 		coffee, err := st.GetCoffee("0000")
 		Expect(err).NotTo(HaveOccurred())
