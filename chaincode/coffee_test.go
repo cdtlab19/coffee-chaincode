@@ -46,22 +46,6 @@ var _ = Describe("Coffee", func() {
 	Context("GetCoffee Method", func() {
 		const method = "GetCoffee"
 
-		It("Should return invalid if called with more than one argument", func() {
-			// invoke method with 0 arguments
-			result := mock.MockInvoke("0000", [][]byte{
-				[]byte(method),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-			// invoke method with 2 arguments
-			result = mock.MockInvoke("0001", [][]byte{
-				[]byte(method),
-				[]byte("a"),
-				[]byte("b"),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-		})
-
 		It("Should return error if no coffee found", func() {
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
@@ -94,22 +78,6 @@ var _ = Describe("Coffee", func() {
 
 	Context("Method UseCoffee", func() {
 		const method = "UseCoffee"
-
-		It("Should return invalid if called with more than one argument", func() {
-			// invoke method with 0 arguments
-			result := mock.MockInvoke("0000", [][]byte{
-				[]byte(method),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-			// invoke method with 2 arguments
-			result = mock.MockInvoke("0001", [][]byte{
-				[]byte(method),
-				[]byte("a"),
-				[]byte("b"),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-		})
 
 		It("Should not set the owner to an already owned chaincode", func() {
 			coffee := model.NewCoffee("0000", "cappuccino")
@@ -151,22 +119,6 @@ var _ = Describe("Coffee", func() {
 
 	Context("DeleteCoffee", func() {
 		const method = "DeleteCoffee"
-
-		It("Should return invalid if called with more than one argument", func() {
-			// invoke method with 0 arguments
-			result := mock.MockInvoke("0000", [][]byte{
-				[]byte(method),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-			// invoke method with 2 arguments
-			result = mock.MockInvoke("0000", [][]byte{
-				[]byte(method),
-				[]byte("a"),
-				[]byte("b"),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-		})
 
 		It("Should execute successfuly", func() {
 			createTestCoffee(mock, st, model.NewCoffee("0000", "cappuccino"))
