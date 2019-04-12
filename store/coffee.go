@@ -7,10 +7,20 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+// CoffeeKeyNamespace contains the namespace used by coffee composite keys
+// in Hyperledger Fabric State
+const CoffeeKeyNamespace = "Coffee"
+
 // CoffeeStore abstracts coffee CRUD methods
 type CoffeeStore struct {
 	stub   shim.ChaincodeStubInterface
 	logger *shim.ChaincodeLogger
+}
+
+// newCoffeeKey returns the composite key for a coffee instance
+func newCoffeeKey(stub shim.ChaincodeStubInterface, id string) (key string) {
+	key, _ = stub.CreateCompositeKey(CoffeeKeyNamespace, []string{id})
+	return
 }
 
 // NewCoffeeStore creates a new coffee Store
@@ -21,14 +31,15 @@ func NewCoffeeStore(stub shim.ChaincodeStubInterface, logger *shim.ChaincodeLogg
 // AllCoffee returns all existing coffee
 func (c *CoffeeStore) AllCoffee() ([]*model.Coffee, error) {
 	c.logger.Debug("Entered AllCoffee")
-	iterator, err := c.stub.GetStateByPartialCompositeKey(model.CoffeeDocType, []string{model.CoffeeDocType})
+
+	iterator, err := c.stub.GetStateByPartialCompositeKey(CoffeeKeyNamespace, []string{})
 	if err != nil {
 		return nil, err
 	}
 	defer iterator.Close()
 
 	c.logger.Debug("AllCoffee: starting iterator")
-	coffees := make([]*model.Coffee, 1)
+	coffees := []*model.Coffee{}
 	for iterator.HasNext() {
 		k, err := iterator.Next()
 		if err != nil {
@@ -52,7 +63,7 @@ func (c *CoffeeStore) AllCoffee() ([]*model.Coffee, error) {
 func (c *CoffeeStore) GetCoffee(coffeeID string) (coffee *model.Coffee, err error) {
 	c.logger.Debug("GetCoffee: searching for coffee %s", coffeeID)
 
-	data, err := c.stub.GetState(model.CoffeeKey(coffeeID))
+	data, err := c.stub.GetState(newCoffeeKey(c.stub, coffeeID))
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +75,11 @@ func (c *CoffeeStore) GetCoffee(coffeeID string) (coffee *model.Coffee, err erro
 // SetCoffee sets a coffee asset by it's id
 func (c *CoffeeStore) SetCoffee(coffee *model.Coffee) error {
 	c.logger.Debug("SetCoffee: setting coffee %s", coffee.ID)
-	return c.stub.PutState(coffee.Key(), coffee.JSON())
+	return c.stub.PutState(newCoffeeKey(c.stub, coffee.ID), coffee.JSON())
 }
 
 // DeleteCoffee deletes a coffee asset by it's id
 func (c *CoffeeStore) DeleteCoffee(coffeeID string) error {
 	c.logger.Debug("DeleteCoffee: deleting coffee %s", coffeeID)
-	return c.stub.DelState(model.CoffeeKey(coffeeID))
+	return c.stub.DelState(newCoffeeKey(c.stub, coffeeID))
 }

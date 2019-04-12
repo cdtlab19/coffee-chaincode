@@ -6,16 +6,8 @@ import (
 	"fmt"
 )
 
-// CoffeePrefix is the prefix used in Coffe's ID
-const CoffeePrefix = "COFFEE"
-
 // CoffeeDocType is the docType used in model
 const CoffeeDocType = "COFFEE"
-
-// CoffeeKey returns the Coffee state key based for a given coffee id
-func CoffeeKey(id string) string {
-	return fmt.Sprintf("%s-%s", CoffeePrefix, id)
-}
 
 // Coffee defines a basic model for coffee
 type Coffee struct {
@@ -33,11 +25,6 @@ func NewCoffee(id string, flavour string) *Coffee {
 		Flavour: flavour,
 		Owner:   "",
 	}
-}
-
-// Key returns the Coffee's state key
-func (c *Coffee) Key() string {
-	return CoffeeKey(c.ID)
 }
 
 // HasOwner verifies if a Coffee has a owner

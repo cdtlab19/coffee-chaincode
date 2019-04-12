@@ -29,6 +29,31 @@ var _ = Describe("Coffee", func() {
 		Expect(result.Payload).To(BeEmpty())
 	})
 
+	Context("AllCoffee", func() {
+		It("Should return all coffees", func() {
+			coffee1 := model.NewCoffee("0000", "cappuccino")
+			coffee2 := model.NewCoffee("0002", "chocolate")
+
+			createTestCoffee(mock, st, coffee1)
+			createTestCoffee(mock, st, coffee2)
+
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte("AllCoffee"),
+			})
+
+			Expect(int(result.Status)).To(Equal(shim.OK))
+
+			var res struct {
+				Coffees []*model.Coffee `json:"coffees"`
+			}
+
+			Expect(json.Unmarshal(result.Payload, &res)).ToNot(HaveOccurred())
+			Expect(res.Coffees).To(HaveLen(2))
+			Expect(res.Coffees).To(ContainElement(coffee1))
+			Expect(res.Coffees).To(ContainElement(coffee2))
+		})
+	})
+
 	It("Should CreateCoffee", func() {
 		result := mock.MockInvoke("0000", [][]byte{
 			[]byte("CreateCoffee"),

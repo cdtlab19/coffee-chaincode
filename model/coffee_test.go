@@ -15,7 +15,6 @@ var _ = Describe("Coffee", func() {
 		Expect(coffee.DocType).To(Equal(CoffeeDocType))
 		Expect(coffee.Flavour).To(Equal("capuccino"))
 		Expect(coffee.ID).To(Equal("test"))
-		Expect(coffee.Key()).To(Equal(CoffeeKey(coffee.ID)))
 
 		Expect(coffee.HasOwner()).To(Equal(false))
 
