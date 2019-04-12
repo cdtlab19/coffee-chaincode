@@ -1,19 +1,20 @@
 package chaincode
 
 import (
-	"fmt"
+	"github.com/vtfr/rocha/argsmw"
 
 	"github.com/cdtlab19/coffee-chaincode/model"
 	"github.com/cdtlab19/coffee-chaincode/store"
 	"github.com/cdtlab19/coffee-chaincode/utils"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/vtfr/rocha"
 )
 
 // UserChaincode is a chaincode controller for user assets
 type UserChaincode struct {
 	logger *shim.ChaincodeLogger
-	router *utils.Router
+	router *rocha.Router
 }
 
 var _ shim.Chaincode = &UserChaincode{}
@@ -22,11 +23,19 @@ var _ shim.Chaincode = &UserChaincode{}
 // usuários com os parâmetros default
 func NewUserChaincode(logger *shim.ChaincodeLogger) *UserChaincode {
 	chaincode := &UserChaincode{logger: logger}
-	chaincode.router = utils.NewRouter().
-		Add("CreateUser", chaincode.CreateUser).
-		Add("GetUser", chaincode.GetUser).
-		Add("AllUser", chaincode.AllUser).
-		Add("DeleteUser", chaincode.DeleteUser)
+	chaincode.router = rocha.NewRouter().
+		// CreateUser creates a new user with a `name`
+		Handle("CreateUser",
+			utils.RespondJSON(chaincode.CreateUser),
+			argsmw.Arguments(argsmw.String("name"))).
+		// GetUser returns an user by it's id
+		Handle("GetUser", utils.RespondJSON(chaincode.GetUser),
+			argsmw.Arguments(argsmw.String("id"))).
+		// AllUser returns all users
+		Handle("AllUser", utils.RespondJSON(chaincode.AllCoffee)).
+		// DeleteUser deles an user by it's `id`
+		Handle("DeleteUser", utils.RespondJSON(chaincode.DeleteUser),
+			argsmw.Arguments(argsmw.String("id")))
 
 	return chaincode
 
@@ -40,35 +49,32 @@ func (u *UserChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 // Invoke é chamado toda vez que o Chaicode é invocado
 func (u *UserChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	fn, args := stub.GetFunctionAndParameters()
-	return u.router.Handle(stub, fn, args)
+	return u.router.Invoke(stub, fn, args)
 }
 
+// store
 func (u *UserChaincode) store(stub shim.ChaincodeStubInterface) *store.UserStore {
 	return store.NewUserStore(stub, u.logger)
 }
 
 // CreateUser cria um novo usuário
-func (u *UserChaincode) CreateUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
-	if len(args) != 1 {
-		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
-	}
+func (u *UserChaincode) CreateUser(c rocha.Context) (interface{}, error) {
+	stub := c.Stub()
 
-	user := model.NewUser(stub.GetTxID(), args[0])
+	user := model.NewUser(stub.GetTxID(), c.String("name"))
 
 	if err := u.store(stub).SetUser(user); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return struct {
+		User *model.User `json:"user"`
+	}{user}, nil
 }
 
 // GetUser retorna um usuário
-func (u *UserChaincode) GetUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
-	if len(args) != 1 {
-		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
-	}
-
-	user, err := u.store(stub).GetUser(args[0])
+func (u *UserChaincode) GetUser(c rocha.Context) (interface{}, error) {
+	user, err := u.store(c.Stub()).GetUser(c.String("id"))
 	if err != nil {
 		return nil, err
 	}
@@ -79,12 +85,9 @@ func (u *UserChaincode) GetUser(stub shim.ChaincodeStubInterface, args []string)
 }
 
 // AllUser retorna todos os usuários
-func (u *UserChaincode) AllUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
-	if len(args) != 0 {
-		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
-	}
+func (u *UserChaincode) AllUser(c rocha.Context) (interface{}, error) {
 
-	users, err := u.store(stub).AllUser()
+	users, err := u.store(c.Stub()).AllUser()
 	if err != nil {
 		return nil, err
 	}
@@ -96,10 +99,6 @@ func (u *UserChaincode) AllUser(stub shim.ChaincodeStubInterface, args []string)
 }
 
 // DeleteUser deleta um usuário
-func (u *UserChaincode) DeleteUser(stub shim.ChaincodeStubInterface, args []string) (interface{}, error) {
-	if len(args) != 1 {
-		return nil, fmt.Errorf("Precisa de '%d' argumentos, recebido '%d'", 1, len(args))
-	}
-
-	return nil, u.store(stub).DeleteUser(args[0])
+func (u *UserChaincode) DeleteUser(c rocha.Context) (interface{}, error) {
+	return nil, u.store(c.Stub()).DeleteUser(c.String("id"))
 }
