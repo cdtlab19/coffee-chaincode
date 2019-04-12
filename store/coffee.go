@@ -7,10 +7,6 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-// CoffeeKeyNamespace contains the namespace used by coffee composite keys
-// in Hyperledger Fabric State
-const CoffeeKeyNamespace = "Coffee"
-
 // CoffeeStore abstracts coffee CRUD methods
 type CoffeeStore struct {
 	stub   shim.ChaincodeStubInterface
@@ -18,8 +14,8 @@ type CoffeeStore struct {
 }
 
 // newCoffeeKey returns the composite key for a coffee instance
-func newCoffeeKey(stub shim.ChaincodeStubInterface, id string) (key string) {
-	key, _ = stub.CreateCompositeKey(CoffeeKeyNamespace, []string{id})
+func (c *CoffeeStore) newCoffeeKey(id string) (key string) {
+	key, _ = c.stub.CreateCompositeKey(model.CoffeeDocType, []string{id})
 	return
 }
 
@@ -32,7 +28,7 @@ func NewCoffeeStore(stub shim.ChaincodeStubInterface, logger *shim.ChaincodeLogg
 func (c *CoffeeStore) AllCoffee() ([]*model.Coffee, error) {
 	c.logger.Debug("Entered AllCoffee")
 
-	iterator, err := c.stub.GetStateByPartialCompositeKey(CoffeeKeyNamespace, []string{""})
+	iterator, err := c.stub.GetStateByPartialCompositeKey(model.CoffeeDocType, []string{})
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +59,7 @@ func (c *CoffeeStore) AllCoffee() ([]*model.Coffee, error) {
 func (c *CoffeeStore) GetCoffee(coffeeID string) (coffee *model.Coffee, err error) {
 	c.logger.Debug("GetCoffee: searching for coffee %s", coffeeID)
 
-	data, err := c.stub.GetState(newCoffeeKey(c.stub, coffeeID))
+	data, err := c.stub.GetState(c.newCoffeeKey(coffeeID))
 	if err != nil {
 		return nil, err
 	}
@@ -75,11 +71,11 @@ func (c *CoffeeStore) GetCoffee(coffeeID string) (coffee *model.Coffee, err erro
 // SetCoffee sets a coffee asset by it's id
 func (c *CoffeeStore) SetCoffee(coffee *model.Coffee) error {
 	c.logger.Debug("SetCoffee: setting coffee %s", coffee.ID)
-	return c.stub.PutState(newCoffeeKey(c.stub, coffee.ID), coffee.JSON())
+	return c.stub.PutState(c.newCoffeeKey(coffee.ID), coffee.JSON())
 }
 
 // DeleteCoffee deletes a coffee asset by it's id
 func (c *CoffeeStore) DeleteCoffee(coffeeID string) error {
 	c.logger.Debug("DeleteCoffee: deleting coffee %s", coffeeID)
-	return c.stub.DelState(newCoffeeKey(c.stub, coffeeID))
+	return c.stub.DelState(c.newCoffeeKey(coffeeID))
 }

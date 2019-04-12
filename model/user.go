@@ -5,16 +5,8 @@ import (
 	"fmt"
 )
 
-// UserPrefix is the prefix used in User's ID
-const UserPrefix = "USER"
-
 // UserDocType is the DocType use in model
-const UserDocType = "USER"
-
-// UserKey returns the User state key for a given user id
-func UserKey(id string) string {
-	return fmt.Sprintf("%s-%s", UserPrefix, id)
-}
+const UserDocType = "user"
 
 // User defines a basic model for an user
 type User struct {
@@ -30,11 +22,6 @@ func NewUser(id string, name string) *User {
 		ID:      id,
 		Name:    name,
 	}
-}
-
-// Key returns the User's state key
-func (u *User) Key() string {
-	return UserKey(u.ID)
 }
 
 // Valid verifies if an User is valid

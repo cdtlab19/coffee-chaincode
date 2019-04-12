@@ -2,7 +2,6 @@ package store
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/cdtlab19/coffee-chaincode/model"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -19,17 +18,22 @@ func NewUserStore(stub shim.ChaincodeStubInterface, logger *shim.ChaincodeLogger
 	return &UserStore{stub, logger}
 }
 
+func (u *UserStore) newUserKey(id string) (key string) {
+	key, _ = u.stub.CreateCompositeKey(model.UserDocType, []string{id})
+	return
+}
+
 // AllUser returns all existing users
 func (u *UserStore) AllUser() ([]*model.User, error) {
 	u.logger.Debug("Entered AllUser")
-	iterator, err := u.stub.GetStateByPartialCompositeKey(model.UserDocType, []string{model.UserDocType})
+	iterator, err := u.stub.GetStateByPartialCompositeKey(model.UserDocType, []string{})
 	if err != nil {
 		return nil, err
 	}
 	defer iterator.Close()
 
 	u.logger.Debug("AllUser: starting iterator")
-	users := make([]*model.User, 1)
+	users := []*model.User{}
 	for iterator.HasNext() {
 		k, err := iterator.Next()
 		if err != nil {
@@ -54,7 +58,7 @@ func (u *UserStore) AllUser() ([]*model.User, error) {
 func (u *UserStore) GetUser(userID string) (user *model.User, err error) {
 	u.logger.Debug("GetUser: searching for user '%s'", userID)
 
-	data, err := u.stub.GetState(model.UserKey(userID))
+	data, err := u.stub.GetState(u.newUserKey(userID))
 	if err != nil {
 		return nil, err
 	}
@@ -66,14 +70,11 @@ func (u *UserStore) GetUser(userID string) (user *model.User, err error) {
 // SetUser sets an user asset by it's ID
 func (u *UserStore) SetUser(user *model.User) error {
 	u.logger.Debug("SetUser: setting user %s", user.ID)
-	if user.ID != "" {
-		return u.stub.PutState(user.Key(), user.JSON())
-	}
-	return fmt.Errorf("ID cannot be empty")
+	return u.stub.PutState(u.newUserKey(user.ID), user.JSON())
 }
 
 // DeleteUser deletes an user asset by it's ID
 func (u *UserStore) DeleteUser(userID string) error {
 	u.logger.Debug("DeleteUser: deleting user %s", userID)
-	return u.stub.DelState(model.UserKey(userID))
+	return u.stub.DelState(u.newUserKey(userID))
 }

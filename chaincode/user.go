@@ -32,7 +32,7 @@ func NewUserChaincode(logger *shim.ChaincodeLogger) *UserChaincode {
 		Handle("GetUser", utils.RespondJSON(chaincode.GetUser),
 			argsmw.Arguments(argsmw.String("id"))).
 		// AllUser returns all users
-		Handle("AllUser", utils.RespondJSON(chaincode.AllCoffee)).
+		Handle("AllUser", utils.RespondJSON(chaincode.AllUser)).
 		// DeleteUser deles an user by it's `id`
 		Handle("DeleteUser", utils.RespondJSON(chaincode.DeleteUser),
 			argsmw.Arguments(argsmw.String("id")))
@@ -86,7 +86,6 @@ func (u *UserChaincode) GetUser(c rocha.Context) (interface{}, error) {
 
 // AllUser retorna todos os usuários
 func (u *UserChaincode) AllUser(c rocha.Context) (interface{}, error) {
-
 	users, err := u.store(c.Stub()).AllUser()
 	if err != nil {
 		return nil, err
@@ -95,7 +94,6 @@ func (u *UserChaincode) AllUser(c rocha.Context) (interface{}, error) {
 	return struct {
 		Users []*model.User `json:"users"`
 	}{users}, nil
-
 }
 
 // DeleteUser deleta um usuário

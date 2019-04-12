@@ -2,6 +2,7 @@ package chaincode_test
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cdtlab19/coffee-chaincode/model"
 	"github.com/cdtlab19/coffee-chaincode/store"
@@ -39,63 +40,29 @@ var _ = Describe("User", func() {
 			})
 
 			Expect(int(result.Status)).To(Equal(shim.OK))
-			Expect(result.Payload).To(BeEmpty())
+
+			// verify payload
+			var response struct {
+				User *model.User `json:"user"`
+			}
+
+			Expect(json.Unmarshal(result.Payload, &response)).ToNot(HaveOccurred())
+			Expect(response.User.Name).To(Equal("name"))
+			Expect(response.User.ID).To(Equal("0000"))
 
 			user, err := st.GetUser("0000")
 			Expect(err).NotTo(HaveOccurred())
-			Expect(user.ID).To(Equal("0000"))
 			Expect(user.Name).To(Equal("name"))
 		})
-
-		It("Should return invalid if called with something other than one argument", func() {
-			result := mock.MockInvoke("0000", [][]byte{
-				[]byte(method),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-			result = mock.MockInvoke("0001", [][]byte{
-				[]byte(method),
-				[]byte("a"),
-				[]byte("b"),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-		})
-		/*
-			It("Should return invalid if called with something other than one argument", func() {
-				result := mock.MockInvoke("0000", [][]byte{
-					[]byte(method),
-					[]byte(""),
-				})
-
-				Expect(int(result.Status)).To(Equal(shim.ERROR))
-			})
-		*/
 	})
 
 	Context("GetUser", func() {
 		const method = "GetUser"
 
-		It("Expects nothing different than 1 argument", func() {
-			//invoking with 0 arguments
-			result := mock.MockInvoke("0000", [][]byte{
-				[]byte(method),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-			//invoking with more than 1 argument
-			result = mock.MockInvoke("0001", [][]byte{
-				[]byte(method),
-				[]byte("a"),
-				[]byte("b"),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-		})
-
 		It("Should return error if no user was found", func() {
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
-				[]byte("anythingElse"),
+				[]byte("0000"),
 			})
 			Expect(int(result.Status)).To(Equal(shim.ERROR))
 			Expect(result.Payload).To(BeEmpty())
@@ -125,13 +92,30 @@ var _ = Describe("User", func() {
 
 	Context("AllUser", func() {
 		const method = "AllUser"
+		It("Should return all users", func() {
+			user1 := model.NewUser("0000", "Someone")
+			user2 := model.NewUser("0001", "Anyone")
 
-		It("Should return an error if called with any argument", func() {
+			createTestUser(mock, st, user1)
+			createTestUser(mock, st, user2)
+
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
-				[]byte("something"),
 			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
+
+			Expect(int(result.Status)).To(Equal(shim.OK))
+
+			var res struct {
+				Users []*model.User `json:"users"`
+			}
+
+			Expect(json.Unmarshal(result.Payload, &res)).ToNot(HaveOccurred())
+
+			fmt.Printf("%+v", res)
+
+			Expect(res.Users).To(HaveLen(2))
+			Expect(res.Users).To(ContainElement(user1))
+			Expect(res.Users).To(ContainElement(user2))
 		})
 
 	})
@@ -172,8 +156,8 @@ var _ = Describe("User", func() {
 })
 
 func createTestUser(mock *shim.MockStub, st *store.UserStore, user *model.User) {
-	mock.MockTransactionStart("mocked")
-	defer mock.MockTransactionEnd("mocked")
+	mock.MockTransactionStart("int")
+	defer mock.MockTransactionEnd("int")
 
 	if err := st.SetUser(user); err != nil {
 		panic(err)

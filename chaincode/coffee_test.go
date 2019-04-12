@@ -75,6 +75,13 @@ var _ = Describe("Coffee", func() {
 		coffee, err := st.GetCoffee("0000")
 		Expect(err).NotTo(HaveOccurred())
 		Expect(coffee.Flavour).To(Equal("cappuccino"))
+
+		result = mock.MockInvoke("0001", [][]byte{
+			[]byte("CreateCoffee"),
+			[]byte("cappuccino"),
+			[]byte("somethineElse"),
+		})
+
 	})
 
 	Context("GetCoffee Method", func() {

@@ -15,7 +15,6 @@ var _ = Describe("User", func() {
 		Expect(user.DocType).To(Equal(UserDocType))
 		Expect(user.ID).To(Equal("id"))
 		Expect(user.Name).To(Equal("someone"))
-		Expect(user.Key()).To(Equal(UserKey(user.ID)))
 
 		err := user.Valid()
 		Expect(err).NotTo(HaveOccurred())
