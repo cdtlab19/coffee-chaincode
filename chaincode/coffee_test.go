@@ -145,7 +145,7 @@ var _ = Describe("Coffee", func() {
 			Expect(result.Payload).To(BeEmpty())
 
 			// test if state changed
-			coffee, err := store.NewCoffeeStore(mock, logger).GetCoffee("0000")
+			coffee, err := st.GetCoffee("0000")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(coffee.Owner).To(Equal("test-owner"))
 		})
