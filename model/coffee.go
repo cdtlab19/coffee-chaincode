@@ -7,7 +7,7 @@ import (
 )
 
 // CoffeeDocType is the docType used in model
-const CoffeeDocType = "COFFEE"
+const CoffeeDocType = "coffee"
 
 // Coffee defines a basic model for coffee
 type Coffee struct {
