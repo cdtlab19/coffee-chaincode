@@ -32,7 +32,7 @@ func NewCoffeeStore(stub shim.ChaincodeStubInterface, logger *shim.ChaincodeLogg
 func (c *CoffeeStore) AllCoffee() ([]*model.Coffee, error) {
 	c.logger.Debug("Entered AllCoffee")
 
-	iterator, err := c.stub.GetStateByPartialCompositeKey(CoffeeKeyNamespace, []string{})
+	iterator, err := c.stub.GetStateByPartialCompositeKey(CoffeeKeyNamespace, []string{""})
 	if err != nil {
 		return nil, err
 	}
