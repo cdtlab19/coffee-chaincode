@@ -168,34 +168,15 @@ var _ = Describe("Coffee", func() {
 			Expect(result.Payload).To(BeEmpty())
 
 			// test if state changed
-			_, err := store.NewCoffeeStore(mock, logger).GetCoffee("0000")
+			_, err := st.GetCoffee("0000")
 			Expect(err).To(HaveOccurred())
 		})
-	})
-
-	It("Should DeleteCoffee", func() {
-		// create asset for testing
-		createTestCoffee(mock, st, model.NewCoffee("0000", "cappuccino"))
-
-		// invoke UseCoffee
-		result := mock.MockInvoke("0000", [][]byte{
-			[]byte("DeleteCoffee"),
-			[]byte("0000"),
-		})
-
-		// test if transaction was successful
-		Expect(int(result.Status)).To(Equal(shim.OK))
-		Expect(result.Payload).To(BeEmpty())
-
-		// test if state changed
-		_, err := store.NewCoffeeStore(mock, logger).GetCoffee("0000")
-		Expect(err).To(HaveOccurred())
 	})
 })
 
 func createTestCoffee(mock *shim.MockStub, st *store.CoffeeStore, coffee *model.Coffee) {
-	mock.MockTransactionStart("mocked")
-	defer mock.MockTransactionEnd("mocked")
+	mock.MockTransactionStart("int")
+	defer mock.MockTransactionEnd("int")
 
 	if err := st.SetCoffee(coffee); err != nil {
 		panic(err)
