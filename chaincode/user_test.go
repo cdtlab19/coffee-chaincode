@@ -95,9 +95,11 @@ var _ = Describe("User", func() {
 		It("Should return all users", func() {
 			user1 := model.NewUser("0000", "Someone")
 			user2 := model.NewUser("0001", "Anyone")
+			user3 := model.NewUser("0002", "Everybody")
 
 			createTestUser(mock, st, user1)
 			createTestUser(mock, st, user2)
+			createTestUser(mock, st, user3)
 
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
@@ -113,9 +115,10 @@ var _ = Describe("User", func() {
 
 			fmt.Printf("%+v", res)
 
-			Expect(res.Users).To(HaveLen(2))
+			Expect(res.Users).To(HaveLen(3))
 			Expect(res.Users).To(ContainElement(user1))
 			Expect(res.Users).To(ContainElement(user2))
+			Expect(res.Users).To(ContainElement(user3))
 		})
 
 	})
