@@ -37,6 +37,7 @@ var _ = Describe("User", func() {
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
 				[]byte("name"),
+				[]byte("3"),
 			})
 
 			Expect(int(result.Status)).To(Equal(shim.OK))
@@ -49,10 +50,12 @@ var _ = Describe("User", func() {
 			Expect(json.Unmarshal(result.Payload, &response)).ToNot(HaveOccurred())
 			Expect(response.User.Name).To(Equal("name"))
 			Expect(response.User.ID).To(Equal("0000"))
+			Expect(response.User.RemainingCoffee).To(Equal("3"))
 
 			user, err := st.GetUser("0000")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(user.Name).To(Equal("name"))
+			Expect(user.RemainingCoffee).To(Equal("3"))
 		})
 	})
 
@@ -69,7 +72,7 @@ var _ = Describe("User", func() {
 		})
 
 		It("Should return an user if it exists", func() {
-			createTestUser(mock, st, model.NewUser("0000", "someone"))
+			createTestUser(mock, st, model.NewUser("0000", "someone", "3"))
 
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
@@ -93,9 +96,9 @@ var _ = Describe("User", func() {
 	Context("AllUser", func() {
 		const method = "AllUser"
 		It("Should return all users", func() {
-			user1 := model.NewUser("0000", "Someone")
-			user2 := model.NewUser("0001", "Anyone")
-			user3 := model.NewUser("0002", "Everybody")
+			user1 := model.NewUser("0000", "Someone", "3")
+			user2 := model.NewUser("0001", "Anyone", "3")
+			user3 := model.NewUser("0002", "Everybody", "3")
 
 			createTestUser(mock, st, user1)
 			createTestUser(mock, st, user2)
@@ -142,7 +145,7 @@ var _ = Describe("User", func() {
 		})
 
 		It("Should WHAT", func() {
-			createTestUser(mock, st, model.NewUser("0000", "someone"))
+			createTestUser(mock, st, model.NewUser("0000", "someone", "3"))
 
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),

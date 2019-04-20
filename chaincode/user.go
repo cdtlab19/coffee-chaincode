@@ -24,12 +24,17 @@ var _ shim.Chaincode = &UserChaincode{}
 func NewUserChaincode(logger *shim.ChaincodeLogger) *UserChaincode {
 	chaincode := &UserChaincode{logger: logger}
 	chaincode.router = rocha.NewRouter().
-		// CreateUser creates a new user with a `name`
+		// CreateUser creates a new user with a certain amount of remaining coffees
 		Handle("CreateUser",
 			utils.RespondJSON(chaincode.CreateUser),
-			argsmw.Arguments(argsmw.String("name"))).
+			argsmw.Arguments(
+				argsmw.String("name"),
+				argsmw.String("remainingCoffee"))).
 		// GetUser returns an user by it's id
 		Handle("GetUser", utils.RespondJSON(chaincode.GetUser),
+			argsmw.Arguments(argsmw.String("id"))).
+		// DrinkCoffee removes one unit of user's remaining coffees
+		Handle("DrinkCoffee", utils.RespondJSON(chaincode.DrinkCoffee),
 			argsmw.Arguments(argsmw.String("id"))).
 		// AllUser returns all users
 		Handle("AllUser", utils.RespondJSON(chaincode.AllUser)).
@@ -61,7 +66,7 @@ func (u *UserChaincode) store(stub shim.ChaincodeStubInterface) *store.UserStore
 func (u *UserChaincode) CreateUser(c rocha.Context) (interface{}, error) {
 	stub := c.Stub()
 
-	user := model.NewUser(stub.GetTxID(), c.String("name"))
+	user := model.NewUser(stub.GetTxID(), c.String("name"), c.String("remainingCoffee"))
 
 	if err := u.store(stub).SetUser(user); err != nil {
 		return nil, err
@@ -76,6 +81,29 @@ func (u *UserChaincode) CreateUser(c rocha.Context) (interface{}, error) {
 func (u *UserChaincode) GetUser(c rocha.Context) (interface{}, error) {
 	user, err := u.store(c.Stub()).GetUser(c.String("id"))
 	if err != nil {
+		return nil, err
+	}
+
+	return struct {
+		User *model.User `json:"user"`
+	}{user}, nil
+}
+
+// DrinkCoffee retira uma unidade dos cafés restantes
+func (u *UserChaincode) DrinkCoffee(c rocha.Context) (interface{}, error) {
+	stub := c.Stub()
+	user, err := u.store(c.Stub()).GetUser(c.String("id"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = user.DrinkCoffee()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := u.store(stub).SetUser(user); err != nil {
 		return nil, err
 	}
 
