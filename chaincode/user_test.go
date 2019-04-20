@@ -126,25 +126,61 @@ var _ = Describe("User", func() {
 
 	})
 
-	Context("DeleteUser", func() {
-		const method = "DeleteUser"
+	Context("DrinkCoffee", func() {
+		const method = "DrinkCoffee"
 
-		It("Shoud return invalid if called with something other than one argument", func() {
+		It("Should return error if no user was found", func() {
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
+				[]byte("0000"),
 			})
 			Expect(int(result.Status)).To(Equal(shim.ERROR))
+			Expect(result.Payload).To(BeEmpty())
+		})
 
-			result = mock.MockInvoke("0001", [][]byte{
+		It("Should throw an error if there's no coffee available", func() {
+			createTestUser(mock, st, model.NewUser("0000", "someone", "0"))
+
+			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
-				[]byte("a"),
-				[]byte("b"),
+				[]byte("0000"),
 			})
+
 			Expect(int(result.Status)).To(Equal(shim.ERROR))
 
 		})
 
-		It("Should WHAT", func() {
+		It("Shoud drink an unit of it's available coffees", func() {
+			createTestUser(mock, st, model.NewUser("0000", "someone", "3"))
+
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte(method),
+				[]byte("0000"),
+			})
+
+			Expect(int(result.Status)).To(Equal(shim.OK))
+
+			// verify payload
+			var response struct {
+				User *model.User `json:"user"`
+			}
+
+			Expect(json.Unmarshal(result.Payload, &response)).ToNot(HaveOccurred())
+			Expect(response.User.Name).To(Equal("someone"))
+			Expect(response.User.ID).To(Equal("0000"))
+			Expect(response.User.RemainingCoffee).To(Equal("2"))
+
+			user, err := st.GetUser("0000")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(user.Name).To(Equal("someone"))
+			Expect(user.RemainingCoffee).To(Equal("2"))
+		})
+	})
+
+	Context("DeleteUser", func() {
+		const method = "DeleteUser"
+
+		It("Should delete an user", func() {
 			createTestUser(mock, st, model.NewUser("0000", "someone", "3"))
 
 			result := mock.MockInvoke("0000", [][]byte{

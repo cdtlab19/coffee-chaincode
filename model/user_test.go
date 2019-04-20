@@ -22,20 +22,6 @@ var _ = Describe("User", func() {
 
 	})
 
-	It("Should drink a coffee", func() {
-		user := NewUser("id", "someone", "3")
-		err := user.DrinkCoffee()
-		Expect(err).NotTo(HaveOccurred())
-	})
-
-	It("Should drink only if there's a coffee available", func() {
-		user := NewUser("id", "someone", "3")
-		user.RemainingCoffee = "0"
-
-		err := user.DrinkCoffee()
-		Expect(err).To(HaveOccurred())
-	})
-
 	It("Should have a valid ID", func() {
 		user := NewUser("", "someone", "3")
 		err := user.Valid()
@@ -61,6 +47,20 @@ var _ = Describe("User", func() {
 		Expect(err).To(HaveOccurred())
 	})
 
+	It("Should drink a coffee", func() {
+		user := NewUser("id", "someone", "3")
+		err := user.DrinkCoffee()
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("Should drink only if there's a coffee available", func() {
+		user := NewUser("id", "someone", "3")
+		user.RemainingCoffee = "0"
+
+		err := user.DrinkCoffee()
+		Expect(err).To(HaveOccurred())
+	})
+
 	It("Should be encodable", func() {
 		user := NewUser("id", "someone", "3")
 		jsonUser := user.JSON()
@@ -71,7 +71,5 @@ var _ = Describe("User", func() {
 		Expect(raw).To(HaveKeyWithValue("name", user.Name))
 		Expect(raw).To(HaveKeyWithValue("docType", user.DocType))
 		Expect(raw).To(HaveKeyWithValue("remainingCoffee", user.RemainingCoffee))
-
 	})
-
 })

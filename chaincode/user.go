@@ -91,19 +91,19 @@ func (u *UserChaincode) GetUser(c rocha.Context) (interface{}, error) {
 
 // DrinkCoffee retira uma unidade dos cafés restantes
 func (u *UserChaincode) DrinkCoffee(c rocha.Context) (interface{}, error) {
-	stub := c.Stub()
-	user, err := u.store(c.Stub()).GetUser(c.String("id"))
+	// retrieves the store
+	st := u.store(c.Stub())
 
+	user, err := st.GetUser(c.String("id"))
 	if err != nil {
 		return nil, err
 	}
 
-	err = user.DrinkCoffee()
-	if err != nil {
+	if err = user.DrinkCoffee(); err != nil {
 		return nil, err
 	}
 
-	if err := u.store(stub).SetUser(user); err != nil {
+	if err = st.SetUser(user); err != nil {
 		return nil, err
 	}
 
