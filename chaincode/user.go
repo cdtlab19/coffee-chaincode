@@ -29,7 +29,7 @@ func NewUserChaincode(logger *shim.ChaincodeLogger) *UserChaincode {
 			utils.RespondJSON(chaincode.CreateUser),
 			argsmw.Arguments(
 				argsmw.String("name"),
-				argsmw.String("remainingCoffee"))).
+				argsmw.Int("remainingCoffee", 10))).
 		// GetUser returns an user by it's id
 		Handle("GetUser", utils.RespondJSON(chaincode.GetUser),
 			argsmw.Arguments(argsmw.String("id"))).
@@ -66,7 +66,7 @@ func (u *UserChaincode) store(stub shim.ChaincodeStubInterface) *store.UserStore
 func (u *UserChaincode) CreateUser(c rocha.Context) (interface{}, error) {
 	stub := c.Stub()
 
-	user := model.NewUser(stub.GetTxID(), c.String("name"), c.String("remainingCoffee"))
+	user := model.NewUser(stub.GetTxID(), c.String("name"), c.Int("remainingCoffee"))
 
 	if err := u.store(stub).SetUser(user); err != nil {
 		return nil, err
