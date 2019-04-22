@@ -51,7 +51,6 @@ func (u *UserStore) AllUser() ([]*model.User, error) {
 
 	u.logger.Debug("Exiting AllUsers")
 	return users, nil
-
 }
 
 // GetUser returns an user by it's ID

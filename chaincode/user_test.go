@@ -37,6 +37,7 @@ var _ = Describe("User", func() {
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
 				[]byte("name"),
+				[]byte("3"),
 			})
 
 			Expect(int(result.Status)).To(Equal(shim.OK))
@@ -49,10 +50,12 @@ var _ = Describe("User", func() {
 			Expect(json.Unmarshal(result.Payload, &response)).ToNot(HaveOccurred())
 			Expect(response.User.Name).To(Equal("name"))
 			Expect(response.User.ID).To(Equal("0000"))
+			Expect(response.User.RemainingCoffee).To(Equal(3))
 
 			user, err := st.GetUser("0000")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(user.Name).To(Equal("name"))
+			Expect(user.RemainingCoffee).To(Equal(3))
 		})
 	})
 
@@ -69,7 +72,7 @@ var _ = Describe("User", func() {
 		})
 
 		It("Should return an user if it exists", func() {
-			createTestUser(mock, st, model.NewUser("0000", "someone"))
+			createTestUser(mock, st, model.NewUser("0000", "someone", 3))
 
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
@@ -93,11 +96,13 @@ var _ = Describe("User", func() {
 	Context("AllUser", func() {
 		const method = "AllUser"
 		It("Should return all users", func() {
-			user1 := model.NewUser("0000", "Someone")
-			user2 := model.NewUser("0001", "Anyone")
+			user1 := model.NewUser("0000", "Someone", 3)
+			user2 := model.NewUser("0001", "Anyone", 3)
+			user3 := model.NewUser("0002", "Everybody", 3)
 
 			createTestUser(mock, st, user1)
 			createTestUser(mock, st, user2)
+			createTestUser(mock, st, user3)
 
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
@@ -113,33 +118,70 @@ var _ = Describe("User", func() {
 
 			fmt.Printf("%+v", res)
 
-			Expect(res.Users).To(HaveLen(2))
+			Expect(res.Users).To(HaveLen(3))
 			Expect(res.Users).To(ContainElement(user1))
 			Expect(res.Users).To(ContainElement(user2))
+			Expect(res.Users).To(ContainElement(user3))
 		})
 
+	})
+
+	Context("DrinkCoffee", func() {
+		const method = "DrinkCoffee"
+
+		It("Should return error if no user was found", func() {
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte(method),
+				[]byte("0000"),
+			})
+			Expect(int(result.Status)).To(Equal(shim.ERROR))
+			Expect(result.Payload).To(BeEmpty())
+		})
+
+		It("Should throw an error if there's no coffee available", func() {
+			createTestUser(mock, st, model.NewUser("0000", "someone", 0))
+
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte(method),
+				[]byte("0000"),
+			})
+
+			Expect(int(result.Status)).To(Equal(shim.ERROR))
+
+		})
+
+		It("Shoud drink an unit of it's available coffees", func() {
+			createTestUser(mock, st, model.NewUser("0000", "someone", 3))
+
+			result := mock.MockInvoke("0000", [][]byte{
+				[]byte(method),
+				[]byte("0000"),
+			})
+
+			Expect(int(result.Status)).To(Equal(shim.OK))
+
+			// verify payload
+			var response struct {
+				User *model.User `json:"user"`
+			}
+
+			Expect(json.Unmarshal(result.Payload, &response)).ToNot(HaveOccurred())
+			Expect(response.User.Name).To(Equal("someone"))
+			Expect(response.User.ID).To(Equal("0000"))
+			Expect(response.User.RemainingCoffee).To(Equal(2))
+
+			user, err := st.GetUser("0000")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(user.Name).To(Equal("someone"))
+			Expect(user.RemainingCoffee).To(Equal(2))
+		})
 	})
 
 	Context("DeleteUser", func() {
 		const method = "DeleteUser"
 
-		It("Shoud return invalid if called with something other than one argument", func() {
-			result := mock.MockInvoke("0000", [][]byte{
-				[]byte(method),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-			result = mock.MockInvoke("0001", [][]byte{
-				[]byte(method),
-				[]byte("a"),
-				[]byte("b"),
-			})
-			Expect(int(result.Status)).To(Equal(shim.ERROR))
-
-		})
-
-		It("Should WHAT", func() {
-			createTestUser(mock, st, model.NewUser("0000", "someone"))
+		It("Should delete an user", func() {
+			createTestUser(mock, st, model.NewUser("0000", "someone", 3))
 
 			result := mock.MockInvoke("0000", [][]byte{
 				[]byte(method),
